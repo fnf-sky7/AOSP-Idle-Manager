@@ -62,7 +62,7 @@ This is a deliberate safety trade-off. On ROMs with unusual `dumpsys activity` o
 - A compatible manager build that supports the module installation format and its WebUI/Action integration.
 - For the Magisk WebUI, a BusyBox build that includes the `httpd` applet. The module checks for Magisk's BusyBox at `/data/adb/magisk/busybox` and then tries the available `busybox` command.
 
-**Compatibility note:** Android ROMs, KernelSU forks, manager versions, and OEM `dumpsys` output differ. The module has development-time shell, JavaScript, bridge, backend, lifecycle, and local HTTP/CGI tests, but it has not been physically tested on every device or ROM. Treat this version as a **preview/beta** until it has passed the device-test checklist on your exact setup.
+**Compatibility note:** Android ROMs, KernelSU forks, manager versions, and OEM `dumpsys` output differ. The module has development-time shell, JavaScript, bridge, backend, lifecycle, and local HTTP/CGI tests, but it has not been physically tested on every device or ROM.
 
 ## Installation
 
