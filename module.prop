@@ -1,0 +1,8 @@
+id=aosp_idle_manager
+name=AOSP Idle Manager
+version=1.1.0
+versionCode=110
+author=Yuuki
+description=Public preview: per-app Deep Doze policies for AOSP ROMs; KernelSU and Magisk WebUI.
+webuiIcon=webroot/webui-icon.png
+actionIcon=webroot/webui-icon.png

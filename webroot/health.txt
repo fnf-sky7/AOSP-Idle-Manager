@@ -1,0 +1,1 @@
+AOSP Idle Manager v1.1.0 local WebUI endpoint

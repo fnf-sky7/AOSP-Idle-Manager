@@ -1,0 +1,14 @@
+#!/sbin/sh
+# Magisk module installer entry point.
+umask 022
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+if [ ! -f /data/adb/magisk/util_functions.sh ]; then
+  echo "ui_print ! Magisk installer utilities not found" >> /proc/self/fd/$OUTFD
+  echo "ui_print ! Install this ZIP from the Magisk app" >> /proc/self/fd/$OUTFD
+  exit 1
+fi
+. /data/adb/magisk/util_functions.sh
+install_module

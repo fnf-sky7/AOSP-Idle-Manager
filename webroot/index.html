@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#11131b">
+<title>AOSP Idle Manager</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1018;--panel:#151a25;--panel2:#1b2230;--line:#2a3446;--text:#edf2fb;--muted:#98a5b9;--accent:#8a9dff;--accent2:#5ce0c0;--warn:#f5c86b;--danger:#ff8f9b;--radius:18px}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#1a2440 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Roboto,"Noto Sans",sans-serif;min-height:100vh}
+main{width:min(900px,100%);margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;gap:12px;align-items:center}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#8a9dff,#61ddc2);display:grid;place-items:center;color:#101624;font-size:23px;font-weight:900;box-shadow:0 8px 28px #667dff33}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent2);font-weight:800}.brand h1{font-size:21px;line-height:1.15;margin:3px 0 0}.byline{color:var(--muted);font-size:12px;margin-top:4px}.iconbtn,.btn{border:1px solid var(--line);background:#1a2130;color:var(--text);border-radius:12px;padding:10px 13px;font-weight:700;cursor:pointer}.iconbtn{font-size:18px;min-width:42px}.btn.primary{background:var(--accent);border-color:var(--accent);color:#111526}.btn.danger{color:var(--danger)}button:disabled,select:disabled{opacity:.5;cursor:not-allowed}
+.status{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}.statusbox{background:linear-gradient(135deg,#1b2638,#151b28);border:1px solid var(--line);border-radius:var(--radius);padding:15px}.statuslabel{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800}.statusvalue{font-size:17px;font-weight:800;margin-top:5px;display:flex;align-items:center;gap:8px}.dot{width:9px;height:9px;border-radius:50%;background:var(--accent2);box-shadow:0 0 12px #5ce0c080}.dot.off{background:var(--warn);box-shadow:none}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}.panelhead{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel h2{font-size:15px;margin:0;font-weight:800}.switchrow{display:flex;align-items:center;gap:10px}.switch{width:48px;height:28px;border-radius:30px;border:1px solid #526078;background:#303a4d;padding:3px;cursor:pointer}.switch span{display:block;width:20px;height:20px;border-radius:50%;background:white;transition:transform .18s}.switch.on{background:#367f78;border-color:#54cdb4}.switch.on span{transform:translateX(20px)}
+.note{font-size:12px;color:var(--muted);line-height:1.55;margin:11px 0 0}.note strong{color:#dce6fa}.toolbar{display:flex;gap:10px;align-items:center;margin:18px 0 10px}.search{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;color:var(--text);font:inherit;outline:none}.search:focus{border-color:var(--accent)}.filters{display:flex;gap:7px;overflow:auto;padding:2px 0 10px}.filter{white-space:nowrap;border:1px solid var(--line);color:var(--muted);background:transparent;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:800}.filter.active{background:#293450;border-color:#586caa;color:#e8edff}.count{font-size:12px;color:var(--muted);margin:4px 2px 11px}.apps{display:grid;gap:9px}.app{display:grid;grid-template-columns:minmax(0,1fr) minmax(158px,210px);gap:12px;align-items:center;padding:13px 14px;background:var(--panel);border:1px solid var(--line);border-radius:15px}.appname{font-weight:800;font-size:14px;overflow-wrap:anywhere}.pkg{font-weight:600;font-size:11px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.meta{display:flex;align-items:center;gap:7px;margin-top:6px;flex-wrap:wrap}.tag{font-size:10px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.tag.system{color:#a9b9ff;border-color:#46568a}.tag.user{color:#70ddc5;border-color:#326c64}.tag.locked{color:var(--warn);border-color:#75623b}.policy{width:100%;background:#202a3b;border:1px solid #3b4b65;color:var(--text);border-radius:11px;padding:10px 9px;font:inherit;font-size:12px;outline:none}.policy:focus{border-color:var(--accent)}.empty{padding:35px 15px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px}.footer{margin-top:22px;color:var(--muted);font-size:11px;line-height:1.65;text-align:center}.footer a{color:var(--accent)}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#e9efff;color:#101624;padding:10px 15px;border-radius:12px;font-size:13px;font-weight:750;box-shadow:0 8px 30px #0007;transition:.2s;max-width:90vw;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.loading{height:74px;border-radius:15px;background:linear-gradient(90deg,#171e2b,#202b3c,#171e2b);background-size:200% 100%;animation:shine 1.3s infinite}@keyframes shine{to{background-position:-200% 0}}.actions{display:flex;gap:8px;flex-wrap:wrap}.small{font-size:11px;color:var(--muted)}
+@media(max-width:560px){main{padding-left:12px;padding-right:12px}.status{gap:8px}.statusbox{padding:12px}.statusvalue{font-size:15px}.app{grid-template-columns:1fr;gap:9px}.policy{font-size:13px}.toolbar{gap:7px}.toolbar .btn{padding:10px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand"><div class="logo">◒</div><div><div class="eyebrow">AOSP power tools</div><h1>AOSP Idle Manager</h1><div class="byline">Per-app idle policies · by Yuuki</div></div></div>
+  <button class="iconbtn" id="refresh" aria-label="Refresh app list" title="Refresh">↻</button>
+</header>
+<section class="status">
+  <div class="statusbox"><div class="statuslabel">Deep Doze status</div><div class="statusvalue"><i class="dot off" id="idleDot"></i><span id="idleText">Connecting…</span></div><div class="sub" id="idleSub">Reading Android Deep Doze state</div></div>
+  <div class="statusbox"><div class="statuslabel">Policy engine</div><div class="statusvalue"><i class="dot" id="engineDot"></i><span id="engineText">Enabled</span></div><div class="sub" id="engineSub">Rules are applied during Deep Doze</div></div>
+</section>
+<section class="panel">
+  <div class="panelhead"><h2>Idle manager</h2><div class="switchrow"><span class="small" id="toggleLabel">Enabled</span><button class="switch on" id="globalSwitch" aria-label="Toggle idle manager"><span></span></button></div></div>
+  <p class="note">Policies run when Android reports <strong>Deep Doze: IDLE</strong> or <strong>IDLE_MAINTENANCE</strong>. Screen-off alone does not immediately count as idle. Android decides when Deep Doze begins. The status refreshes automatically.</p>
+</section>
+<div class="toolbar"><input id="search" class="search" type="search" placeholder="Search apps or package names…" autocomplete="off"><button class="btn" id="reset">Reset</button></div>
+<div class="filters" role="group" aria-label="Filter apps"><button class="filter active" data-filter="all">All apps</button><button class="filter" data-filter="system">System</button><button class="filter" data-filter="user">User</button><button class="filter" data-filter="configured">Configured</button></div>
+<div class="count" id="count">Loading installed apps…</div>
+<div class="apps" id="apps"><div class="loading"></div><div class="loading"></div><div class="loading"></div></div>
+<section class="panel" style="margin-top:18px">
+  <h2>Policy guide</h2>
+  <p class="note"><strong>Default</strong> — AOSP handles the app normally.</p>
+  <p class="note"><strong>Kill Background Process</strong> — runs <code>am kill</code>; Android kills only processes it considers safe to kill. The app may later restart.</p>
+  <p class="note"><strong>Kill After 10 Minutes</strong> — after 10 minutes in Deep Doze, the module force-stops the app.</p>
+  <p class="note"><strong>Full Kill</strong> — force-stops the app as soon as Deep Doze is detected. Android keeps it in the stopped state until a direct user/system launch clears that state; this is not a permanent autostart ban and does not disable/uninstall the package.</p>
+  <p class="note"><strong>Safety:</strong> force-stop can interrupt notifications, alarms, accessibility, VPN, device automation and background sync. Some core Android packages are protected, but OEM-specific critical packages may not be recognized. Test policies one app at a time.</p>
+</section>
+<footer class="footer">AOSP Idle Manager v1.1.0 · Copyright © 2026 Yuuki<br>License: MIT. You may use, modify, and redistribute this module with the copyright and license notice retained. No warranty is provided. No third-party libraries or remote assets are bundled.</footer>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+(async () => {
+  'use strict';
+  let token = new URLSearchParams(location.hash.replace(/^#/, '')).get('token') || ''; // Fragment is never sent to the local HTTP server.
+  const $ = id => document.getElementById(id);
+  let bridge = null;
+  let bridgeKind = 'none';
+
+  // Current KernelSU exposes the `kernelsu` ES module. WebUI-Next exposes
+  // a global `ksu` object. Magisk uses the separate loopback CGI fallback.
+  try {
+    const imported = await import('kernelsu');
+    if (imported && typeof imported.exec === 'function') {
+      bridge = imported;
+      bridgeKind = 'module';
+    }
+  } catch (_) {}
+  if (!bridge && window.ksu && typeof window.ksu.exec === 'function') {
+    bridge = window.ksu;
+    bridgeKind = 'global';
+  }
+
+  const state = {
+    apps: [], filter: 'all', enabled: true, loading: false,
+    statusLoading: false, nativeKSU: !!bridge, apiPath: ''
+  };
+  const modes = [
+    ['none', 'Default'],
+    ['kill', 'Kill Background Process'],
+    ['after10', 'Kill After 10 Minutes'],
+    ['full', 'Full Kill']
+  ];
+  let toastTimer;
+
+  function toast(message) {
+    $('toast').textContent = message;
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2800);
+    try { if (bridge && typeof bridge.toast === 'function') bridge.toast(message); } catch (_) {}
+  }
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function parseJsonMaybe(value, fallback) {
+    try { return typeof value === 'string' ? JSON.parse(value) : (value ?? fallback); }
+    catch (_) { return fallback; }
+  }
+  function shellQuote(value) { return "'" + String(value).replace(/'/g, "'\\''") + "'"; }
+
+  function callbackExec(command, withOptions) {
+    return new Promise((resolve, reject) => {
+      const callbackName = 'aospIdleExec_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+      let finished = false;
+      const timer = setTimeout(() => finish(124, '', 'KernelSU command timed out. Reopen the module WebUI and check root permission.'), 20000);
+      function finish(code, stdout, stderr) {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        try { delete window[callbackName]; } catch (_) { window[callbackName] = undefined; }
+        if (Number(code || 0) !== 0) reject(new Error(String(stderr || stdout || ('Root command failed: ' + code)).trim()));
+        else resolve(String(stdout ?? ''));
+      }
+      window[callbackName] = finish;
+      try {
+        if (withOptions) bridge.exec(command, JSON.stringify({}), callbackName);
+        else bridge.exec(command, callbackName);
+      } catch (error) {
+        finish(1, '', error && error.message ? error.message : String(error));
+      }
+    });
+  }
+  async function ksuExec(command) {
+    if (!bridge || typeof bridge.exec !== 'function') throw new Error('KernelSU WebUI API is unavailable. Open this page from the KernelSU module WebUI button.');
+    if (bridgeKind === 'module') {
+      const result = await bridge.exec(command);
+      if (typeof result === 'string') return result;
+      if (result && typeof result === 'object') {
+        if (Number(result.errno || 0) !== 0) throw new Error(String(result.stderr || result.stdout || 'KernelSU command failed').trim());
+        return String(result.stdout ?? '');
+      }
+      throw new Error('KernelSU exec returned an unsupported response. Update KernelSU Manager.');
+    }
+    // WebUI-Next documents synchronous exec(cmd) and callback overloads.
+    if (bridge.exec.length >= 3) return callbackExec(command, true);
+    if (bridge.exec.length >= 2) return callbackExec(command, false);
+    const result = bridge.exec(command);
+    if (result && typeof result.then === 'function') {
+      const value = await result;
+      if (typeof value === 'string') return value;
+      if (value && typeof value === 'object') {
+        if (Number(value.errno || 0) !== 0) throw new Error(String(value.stderr || value.stdout || 'KernelSU command failed').trim());
+        return String(value.stdout ?? '');
+      }
+    }
+    if (typeof result === 'string') return result;
+    if (result && typeof result === 'object' && 'stdout' in result) {
+      if (Number(result.errno || 0) !== 0) throw new Error(String(result.stderr || result.stdout || 'KernelSU command failed').trim());
+      return String(result.stdout ?? '');
+    }
+    throw new Error('KernelSU exec did not return a result. Update KernelSU Manager/WebUI-Next.');
+  }
+
+  async function locateBackend() {
+    if (state.apiPath) return state.apiPath;
+    let dir = '/data/adb/modules/aosp_idle_manager';
+    try {
+      if (bridge && typeof bridge.moduleInfo === 'function') {
+        const info = parseJsonMaybe(bridge.moduleInfo(), {});
+        if (info && typeof info.moduleDir === 'string' && info.moduleDir.startsWith('/data/adb/')) dir = info.moduleDir;
+      }
+    } catch (_) {}
+    state.apiPath = dir + '/ksu-api.sh';
+    return state.apiPath;
+  }
+  async function ksuCommand(action, arg1 = '', arg2 = '') {
+    const backend = await locateBackend();
+    const command = '/system/bin/sh ' + shellQuote(backend) + ' ' + shellQuote(action) +
+      (arg1 !== '' ? ' ' + shellQuote(arg1) : '') + (arg2 !== '' ? ' ' + shellQuote(arg2) : '');
+    const output = (await ksuExec(command)).trim();
+    if (output.startsWith('ERROR:')) throw new Error(output.substring(6).trim());
+    return output;
+  }
+  async function magiskApi(action, params = {}, method = 'GET') {
+    if (!token) throw new Error('Secure WebUI session is missing. Tap the module Action button again to open a new session.');
+    const q = new URLSearchParams({ action, ...params });
+    const response = await fetch('/cgi-bin/api.sh?' + q.toString(), {
+      method, cache: 'no-store', headers: { 'X-AOSP-Idle-Token': token }
+    });
+    let data;
+    try { data = await response.json(); }
+    catch (_) { throw new Error(`Magisk WebUI API returned invalid JSON (HTTP ${response.status}).`); }
+    if (!response.ok || !data.ok) throw new Error(data.error || `Request failed (HTTP ${response.status}).`);
+    return data;
+  }
+  function parsePackageNames(raw) {
+    const parsed = parseJsonMaybe(raw, []);
+    if (Array.isArray(parsed)) return parsed.map(x => typeof x === 'string' ? x : (x && (x.packageName || x.package) || '')).filter(x => /^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)+$/.test(x) || x === 'android');
+    return [];
+  }
+  function getPackageManagerApi() {
+    // Official KernelSU exports `pm` as an object. Some older forks expose
+    // a pm() accessor, so support both without assuming one shape.
+    try {
+      if (bridge && bridge.pm) return typeof bridge.pm === 'function' ? bridge.pm() : bridge.pm;
+    } catch (_) {}
+    try {
+      if (window.ksu && window.ksu.pm) return typeof window.ksu.pm === 'function' ? window.ksu.pm() : window.ksu.pm;
+    } catch (_) {}
+    return null;
+  }
+  function getKsuPackageNames() {
+    const pmApi = getPackageManagerApi();
+    try {
+      if (pmApi && typeof pmApi.listPackages === 'function') {
+        const result = parsePackageNames(pmApi.listPackages('all'));
+        if (result.length) return result;
+      }
+    } catch (_) {}
+    try {
+      if (bridgeKind === 'global' && typeof bridge.listAllPackages === 'function') {
+        const result = parsePackageNames(bridge.listAllPackages());
+        if (result.length) return result;
+      }
+    } catch (_) {}
+    try {
+      if (bridge && typeof bridge.listPackages === 'function') {
+        const result = parsePackageNames(bridge.listPackages('all'));
+        if (result.length) return result;
+      }
+    } catch (_) {}
+    try {
+      if (bridge && typeof bridge.listSystemPackages === 'function' && typeof bridge.listUserPackages === 'function') {
+        const all = [...parsePackageNames(bridge.listSystemPackages()), ...parsePackageNames(bridge.listUserPackages())];
+        if (all.length) return all;
+      }
+    } catch (_) {}
+    return [];
+  }
+  function getKsuPackageInfo(names) {
+    const pmApi = getPackageManagerApi();
+    try {
+      if (pmApi && typeof pmApi.getPackagesInfo === 'function') {
+        const result = parseJsonMaybe(pmApi.getPackagesInfo(names), []);
+        if (Array.isArray(result) && result.length) return result;
+      }
+    } catch (_) {}
+    try {
+      if (bridge && typeof bridge.getPackagesInfo === 'function') {
+        const arg = bridgeKind === 'global' ? JSON.stringify(names) : names;
+        const result = parseJsonMaybe(bridge.getPackagesInfo(arg), []);
+        if (Array.isArray(result) && result.length) return result;
+      }
+    } catch (_) {}
+    return [];
+  }
+  function getKsuSystemPackages() {
+    const pmApi = getPackageManagerApi();
+    try {
+      if (pmApi && typeof pmApi.listPackages === 'function') {
+        const result = parsePackageNames(pmApi.listPackages('system'));
+        if (result.length) return result;
+      }
+    } catch (_) {}
+    try {
+      if (bridgeKind === 'global' && typeof bridge.listSystemPackages === 'function') {
+        const a = parsePackageNames(bridge.listSystemPackages());
+        if (a.length) return a;
+      }
+    } catch (_) {}
+    try { if (bridge && typeof bridge.listPackages === 'function') return parsePackageNames(bridge.listPackages('system')); } catch (_) {}
+    return [];
+  }
+  function isProtected(pkg) {
+    return new Set([
+      'android','com.android.systemui','com.android.settings','com.android.phone',
+      'com.android.server.telecom','com.android.providers.settings','com.android.providers.contacts',
+      'com.android.providers.telephony','com.android.permissioncontroller',
+      'com.google.android.permissioncontroller','com.android.packageinstaller',
+      'com.google.android.packageinstaller','com.android.launcher3',
+      'com.google.android.apps.nexuslauncher','com.android.inputmethod.latin',
+      'com.google.android.inputmethod.latin','com.android.networkstack',
+      'com.android.networkstack.tethering','com.android.bluetooth','com.android.nfc',
+      'com.android.location.fused','com.android.cellbroadcastservice'
+    ]).has(pkg);
+  }
+  async function loadKsuApps() {
+    let names = getKsuPackageNames();
+    if (!names.length) {
+      let userId = '0';
+      try { userId = (await ksuExec('/system/bin/am get-current-user 2>/dev/null')).trim() || '0'; } catch (_) {}
+      if (!/^\d+$/.test(userId)) userId = '0';
+      const output = await ksuExec('/system/bin/pm list packages --user ' + shellQuote(userId) + ' 2>/dev/null');
+      names = output.split(/\r?\n/).map(x => x.replace(/^package:/, '').trim()).filter(x => /^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)+$/.test(x) || x === 'android');
+    }
+    if (!names.length) throw new Error('KernelSU Package Manager returned no installed packages. Update KernelSU Manager and reopen this WebUI.');
+    const unique = [...new Set(names)].sort((a, b) => a.localeCompare(b));
+    const info = getKsuPackageInfo(unique);
+    const infoMap = new Map();
+    if (Array.isArray(info)) info.forEach(item => {
+      if (item && item.packageName && !item.error && !infoMap.has(item.packageName)) infoMap.set(item.packageName, item);
+    });
+    const systemSet = new Set(getKsuSystemPackages());
+    return unique.map(pkg => {
+      const item = infoMap.get(pkg) || {};
+      const isSystem = typeof item.isSystem === 'boolean' ? item.isSystem : systemSet.has(pkg);
+      const label = typeof item.appLabel === 'string' && item.appLabel.trim() ? item.appLabel : pkg;
+      return { package: pkg, label, type: isSystem ? 'system' : 'user', protected: isProtected(pkg), mode: 'none' };
+    });
+  }
+  function renderStatus(data) {
+    const idle = data.idle_state === 'IDLE' || data.idle_state === 'IDLE_MAINTENANCE';
+    let stateLabel = 'Active / not idle';
+    let stateSub = 'Android has not entered Deep Doze';
+    if (idle) { stateLabel = data.idle_state.replace('_', ' '); stateSub = 'Idle policies are active'; }
+    else if (data.idle_state === 'UNKNOWN') { stateLabel = 'Unavailable'; stateSub = 'This ROM did not expose the Deep Doze state'; }
+    $('idleText').textContent = stateLabel;
+    $('idleSub').textContent = stateSub;
+    $('idleDot').className = 'dot' + (idle ? '' : ' off');
+    state.enabled = data.enabled === true || data.enabled === 1 || data.enabled === '1';
+    $('engineText').textContent = state.enabled ? 'Enabled' : 'Disabled';
+    $('engineSub').textContent = state.enabled ? 'Rules are applied during Deep Doze' : 'All app policies are paused';
+    $('engineDot').className = 'dot' + (state.enabled ? '' : ' off');
+    $('toggleLabel').textContent = state.enabled ? 'Enabled' : 'Disabled';
+    $('globalSwitch').classList.toggle('on', state.enabled);
+    $('globalSwitch').setAttribute('aria-pressed', String(state.enabled));
+  }
+  function renderApps() {
+    const query = $('search').value.trim().toLowerCase();
+    const shown = state.apps.filter(app => {
+      const qmatch = !query || app.package.toLowerCase().includes(query) || app.label.toLowerCase().includes(query);
+      const fmatch = state.filter === 'all' || (state.filter === 'configured' ? app.mode !== 'none' : app.type === state.filter);
+      return qmatch && fmatch;
+    });
+    $('count').textContent = `${shown.length} shown · ${state.apps.length} installed`;
+    if (!shown.length) { $('apps').innerHTML = '<div class="empty">No matching apps found. Try another search or filter.</div>'; return; }
+    $('apps').innerHTML = shown.map(app => {
+      const options = modes.map(([value, label]) => `<option value="${value}" ${app.mode === value ? 'selected' : ''}>${label}</option>`).join('');
+      const locked = app.protected;
+      return `<article class="app">
+        <div><div class="appname">${escapeHtml(app.label)}</div><div class="pkg">${escapeHtml(app.package)}</div><div class="meta"><span class="tag ${app.type}">${app.type}</span>${locked ? '<span class="tag locked">Protected core app</span>' : ''}</div></div>
+        <select class="policy" data-package="${escapeHtml(app.package)}" ${locked ? 'disabled' : ''} aria-label="Idle policy for ${escapeHtml(app.label)}">${options}</select>
+      </article>`;
+    }).join('');
+    $('apps').querySelectorAll('select[data-package]').forEach(select => {
+      select.addEventListener('change', async event => {
+        const pkg = event.target.dataset.package;
+        const mode = event.target.value;
+        const app = state.apps.find(x => x.package === pkg);
+        const previous = app ? app.mode : 'none';
+        if (mode === 'full' && !confirm('Full Kill will force-stop this app during Deep Doze. This may break notifications and background services. Continue?')) {
+          event.target.value = previous; return;
+        }
+        if (mode === 'after10' && !confirm('This app will be force-stopped after 10 minutes of continuous Deep Doze. Continue?')) {
+          event.target.value = previous; return;
+        }
+        event.target.disabled = true;
+        try {
+          if (state.nativeKSU) {
+            const out = await ksuCommand('save', pkg, mode);
+            if (out !== 'OK') throw new Error(out || 'Policy save failed');
+          } else await magiskApi('save', { package: pkg, mode }, 'POST');
+          if (app) app.mode = mode;
+          toast('Policy saved');
+          renderApps();
+        } catch (err) { toast(err.message); await refresh(true); }
+      });
+    });
+  }
+  async function refresh(reloadApps = true) {
+    if (state.loading) return;
+    state.loading = true;
+    $('refresh').disabled = true;
+    try {
+      if (state.nativeKSU) {
+        const statusPromise = ksuCommand('status');
+        if (reloadApps) {
+          const [statusText, configText, apps] = await Promise.all([statusPromise, ksuCommand('config'), loadKsuApps()]);
+          const parts = statusText.trim().split('|');
+          if (parts.length < 2) throw new Error('KernelSU backend returned an invalid status response.');
+          const policyMap = new Map();
+          configText.split(/\r?\n/).forEach(line => { const bits = line.split('|'); if (bits.length === 2) policyMap.set(bits[0], bits[1]); });
+          apps.forEach(app => { app.mode = policyMap.get(app.package) || 'none'; });
+          state.apps = apps;
+          window.currentUser = parts[2] || '0';
+          renderStatus({ idle_state: parts[0], enabled: parts[1] === '1' });
+          renderApps();
+        } else {
+          const statusText = await statusPromise;
+          const parts = statusText.trim().split('|');
+          if (parts.length < 2) throw new Error('KernelSU backend returned an invalid status response.');
+          renderStatus({ idle_state: parts[0], enabled: parts[1] === '1' });
+        }
+      } else if (reloadApps) {
+        const data = await magiskApi('list');
+        state.apps = (data.apps || []).map(app => ({ ...app, label: app.package }));
+        window.currentUser = data.user;
+        renderStatus(data);
+        renderApps();
+      } else {
+        const data = await magiskApi('status');
+        renderStatus(data);
+      }
+    } catch (err) {
+      if (reloadApps) {
+        $('apps').innerHTML = `<div class="empty">${escapeHtml(err.message)}<br><br>${state.nativeKSU ? 'Open this page from the KernelSU module WebUI button and ensure the Manager API is available.' : 'Tap the module Action button, then press Refresh.'}</div>`;
+        $('count').textContent = 'Could not load installed packages';
+      }
+      $('idleText').textContent = 'Unavailable';
+      $('idleSub').textContent = err.message;
+      $('idleDot').className = 'dot off';
+    } finally {
+      state.loading = false;
+      $('refresh').disabled = false;
+    }
+  }
+  async function refreshStatus() {
+    if (state.loading || state.statusLoading) return;
+    state.statusLoading = true;
+    try {
+      if (state.nativeKSU) {
+        const parts = (await ksuCommand('status')).split('|');
+        if (parts.length < 2) throw new Error('Invalid status response');
+        renderStatus({ idle_state: parts[0], enabled: parts[1] === '1' });
+      } else {
+        renderStatus(await magiskApi('status'));
+      }
+    } catch (err) {
+      $('idleText').textContent = 'Unavailable';
+      $('idleSub').textContent = err.message;
+      $('idleDot').className = 'dot off';
+    } finally { state.statusLoading = false; }
+  }
+
+  $('refresh').addEventListener('click', () => refresh(true));
+  $('search').addEventListener('input', renderApps);
+  document.querySelectorAll('.filter').forEach(btn => btn.addEventListener('click', () => {
+    state.filter = btn.dataset.filter;
+    document.querySelectorAll('.filter').forEach(x => x.classList.toggle('active', x === btn));
+    renderApps();
+  }));
+  $('globalSwitch').addEventListener('click', async () => {
+    const next = state.enabled ? '0' : '1';
+    $('globalSwitch').disabled = true;
+    try {
+      if (state.nativeKSU) {
+        const out = await ksuCommand('toggle', next);
+        if (out !== 'OK') throw new Error(out || 'Could not change global state');
+      } else await magiskApi('toggle', { enabled: next }, 'POST');
+      await refreshStatus();
+      toast(next === '1' ? 'Idle manager enabled' : 'Idle manager disabled');
+    } catch (err) { toast(err.message); }
+    finally { $('globalSwitch').disabled = false; }
+  });
+  $('reset').addEventListener('click', async () => {
+    if (!confirm('Clear every per-app policy? Apps already force-stopped remain stopped until a direct launch.')) return;
+    $('reset').disabled = true;
+    try {
+      if (state.nativeKSU) {
+        const out = await ksuCommand('reset');
+        if (out !== 'OK') throw new Error(out || 'Reset failed');
+      } else await magiskApi('reset', {}, 'POST');
+      await refresh(true);
+      toast('All policies cleared');
+    } catch (err) { toast(err.message); }
+    finally { $('reset').disabled = false; }
+  });
+
+  if (state.nativeKSU) {
+    $('idleSub').textContent = 'Connected to KernelSU native WebUI';
+    $('count').textContent = 'Loading packages through KernelSU Package Manager…';
+  } else {
+    $('idleSub').textContent = 'Connecting to local Magisk WebUI…';
+  }
+  await refresh(true);
+  setInterval(refreshStatus, 20000);
+})();
+</script>
+</body>
+</html>
