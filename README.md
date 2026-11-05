@@ -201,21 +201,6 @@ The module does not modify system partitions or change system properties. It doe
 - The Magisk API requires a session token; the token is placed in the URL fragment and sent to the API in a request header.
 - The WebUI does not bundle remote assets or third-party JavaScript libraries.
 
-## Testing Status
-
-The v1.1.0 development audit included:
-
-- Shell syntax checks for module scripts and the CGI endpoint.
-- WebUI JavaScript syntax checks.
-- KernelSU official ES-module and package-manager bridge mocks.
-- WebUI-Next bridge mocks.
-- Backend tests for status, policy save, global toggle, reset, protected-package rejection, and stale-lock handling.
-- Daemon simulations for all three policies, foreground protection, timer handling, and lifecycle cleanup.
-- Local BusyBox HTTP/CGI smoke tests, including loopback binding and rejection of requests without a valid session token.
-- ZIP structure, required files, and executable-permission checks.
-
-These are development-environment tests, not proof of compatibility with every physical device. Before calling a ROM/device combination supported, test installation, WebUI app listing, policy persistence, real Deep Doze entry/exit, notifications, alarms, foreground protection, manual relaunch, global disable/enable, update, module disable, reboot, and uninstall on that exact setup.
-
 ## Copyright and License
 
 Copyright (c) 2026 Yuuki.
