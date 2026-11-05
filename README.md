@@ -216,20 +216,6 @@ The v1.1.0 development audit included:
 
 These are development-environment tests, not proof of compatibility with every physical device. Before calling a ROM/device combination supported, test installation, WebUI app listing, policy persistence, real Deep Doze entry/exit, notifications, alarms, foreground protection, manual relaunch, global disable/enable, update, module disable, reboot, and uninstall on that exact setup.
 
-## Public Release Checklist
-
-Before publishing a stable release, record and test:
-
-- Device model and Android version.
-- ROM name and exact build number.
-- KernelSU kernel and Manager versions, or Magisk version.
-- Whether the WebUI lists apps and shows labels/package names correctly.
-- Whether each policy behaves as documented during real Deep Doze.
-- Whether notifications, alarms, accessibility, VPN, and manual app relaunch behave as expected.
-- Whether update, disable, reboot, and uninstall stop the daemon and local server correctly.
-
-Do not claim support for a device or ROM that has not been tested.
-
 ## Copyright and License
 
 Copyright (c) 2026 Yuuki.
